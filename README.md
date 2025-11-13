@@ -6,6 +6,45 @@ Rather than cloning this repo, follow the [Quick Start steps](https://github.com
 
 Visit the [`shopify.dev` documentation](https://shopify.dev/docs/api/shopify-app-react-router) for more details on the React Router app package.
 
+## Zelle payment integration
+
+This project now ships with a lightweight Zelle-based payment handoff that leverages the [Teller API](https://api.teller.io).
+
+1. Provide Teller credentials with the following environment variables:
+   - `TELLER_API_KEY`
+   - `TELLER_API_SECRET`
+   - `TELLER_ACCOUNT_ID`
+   - (optional) `TELLER_API_BASE_URL` for non-default Teller environments.
+2. Apply the latest Prisma schema updates: `npm run setup` or `npx prisma migrate deploy`.
+3. Inside the embedded app, open **Zelle settings** in the navigation and enter the recipient name/email that should receive Zelle transfers.
+
+### Storefront modal
+
+Expose the modal on the storefront (or any public surface) by loading the bundled script and tagging purchase buttons:
+
+```liquid
+<script
+  src="https://YOUR_APP_HOST/zelle-modal.js"
+  data-shop="{{ shop.permanent_domain }}"
+></script>
+
+<button
+  class="zelle-purchase-button"
+  data-amount="{{ cart.total_price | money_without_currency }}"
+  data-currency="USD"
+  data-customer-email="{{ customer.email }}"
+>
+  Pay with Zelle
+</button>
+```
+
+Attach the `data-zelle-purchase` attribute (or the `zelle-purchase-button` class) to any element that should trigger the modal. Optional attributes (`data-amount`, `data-currency`, `data-customer-name`, `data-customer-email`, `data-note`) are forwarded to the Teller API request. If no amount is provided, the script will instruct the buyer to send the transfer manually without calling the API.
+
+### API surface
+
+- `GET /api/zelle?shop=<domain>` returns the configured recipient info for the given shop.
+- `POST /api/zelle` accepts JSON payloads with `shop`, `amount`, `currency`, and optional customer context to initiate a Zelle payment through Teller.
+
 ## Upgrading from Remix
 
 If you have an existing Remix app that you want to upgrade to React Router, please follow the [upgrade guide](https://github.com/Shopify/shopify-app-template-react-router/wiki/Upgrading-from-Remix).  Otherwise, please follow the quick start guide below.

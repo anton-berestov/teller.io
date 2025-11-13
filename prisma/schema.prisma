@@ -30,3 +30,12 @@ model Session {
   collaborator  Boolean?  @default(false)
   emailVerified Boolean?  @default(false)
 }
+
+model ZelleRecipient {
+  id             Int      @id @default(autoincrement())
+  shop           String   @unique
+  recipientName  String
+  recipientEmail String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
